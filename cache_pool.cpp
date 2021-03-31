@@ -25,39 +25,36 @@ bool cache_pool::create_cache_pool(void *private_data, init_cache_handler init_h
     block_count_ = block_count;
     private_data_ = private_data;
     item_size_ = sizeof(cache_t) + block_size;
-    try {
-        unsigned char* array_item = nullptr;
-        array_ = (unsigned char*)malloc(block_count * item_size_);
-        if (array_) {
-            memset(array_, 0, block_count * item_size_);
-            array_item = array_;
-        } else {
-            return false;
-        }
-        cache_t *tmp_cache = nullptr;
-        cache_t *pre_cache = (cache_t *)array_item;
-        pre_cache->data_ = (void*)(pre_cache + 1);
-        pre_cache->next = nullptr;
 
-        if (init_handler) {
-            init_handler(pre_cache, private_data);
-        }
-
-        free_ = pre_cache;
-
-        for(int i=1; i<block_count; i++) {
-            array_item = array_item + item_size_;
-            tmp_cache = (cache_t *)array_item;
-            tmp_cache->data_ = (void*)(tmp_cache + 1);
-            tmp_cache->next = nullptr;
-            if (init_handler) {
-                init_handler(tmp_cache, private_data);
-            }
-            pre_cache->next = tmp_cache;
-            pre_cache = tmp_cache;
-        }
-    } catch(std::bad_alloc &e) {
+    unsigned char* array_item = nullptr;
+    array_ = (unsigned char*)malloc(block_count * item_size_);
+    if (array_) {
+        memset(array_, 0, block_count * item_size_);
+        array_item = array_;
+    } else {
         return false;
+    }
+    cache_t *tmp_cache = nullptr;
+    cache_t *pre_cache = (cache_t *)array_item;
+    pre_cache->data_ = (void*)(pre_cache + 1);
+    pre_cache->next = nullptr;
+
+    if (init_handler) {
+        init_handler(pre_cache, private_data);
+    }
+
+    free_ = pre_cache;
+
+    for(int i=1; i<block_count; i++) {
+        array_item = array_item + item_size_;
+        tmp_cache = (cache_t *)array_item;
+        tmp_cache->data_ = (void*)(tmp_cache + 1);
+        tmp_cache->next = nullptr;
+        if (init_handler) {
+            init_handler(tmp_cache, private_data);
+        }
+        pre_cache->next = tmp_cache;
+        pre_cache = tmp_cache;
     }
     return true;
 }
